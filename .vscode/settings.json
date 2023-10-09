@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "ctype.h": "c",
+        "errno.h": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "stdbool.h": "c",
+        "stdlib.h": "c",
+        "float.h": "c",
+        "wctype.h": "c",
+        "wchar.h": "c",
+        "varargs.h": "c"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "cmake.configureOnOpen": false
+}
