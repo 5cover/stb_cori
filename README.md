@@ -66,7 +66,7 @@ line | A string ended by a newline | ``char *`` (must be freed)
 
 Type name | Expected input | Actual type
 -|-|-
-boolean | A character, present in one of the specified sets of characters representing either ``true`` or ``false`` | ``bool``
+bool | A character, present in one of the specified sets of characters representing either ``true`` or ``false`` | ``bool``
 
 ### 2. How do I handle erroneous input?
 
