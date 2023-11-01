@@ -17,6 +17,8 @@
 #define _POSIX_C_SOURCE 200809L
 #endif
 
+#define STB_CORI_VERSION "1.0.0"
+
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>

@@ -9,7 +9,8 @@
         "float.h": "c",
         "wctype.h": "c",
         "wchar.h": "c",
-        "varargs.h": "c"
+        "varargs.h": "c",
+        "stb_cori.h": "c"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/gcc",
     "cmake.configureOnOpen": false
