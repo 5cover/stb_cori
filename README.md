@@ -31,7 +31,7 @@ long_base | An integer in range [``LONG_MIN`` ; ``LONG_MAX``] in the specified b
 int_base | An integer in range [``INT_MIN`` ; ``INT_MAX``] in the specified base | ``int``
 short_base | An integer in range [``SHRT_MIN`` ; ``SHRT_MAX``] in the specified base | ``short``
 
-### Unsigned integers
+#### Unsigned integers
 
 Type name | Expected input | Actual type
 -|-|-
@@ -46,7 +46,7 @@ ulong_base | An integer in range [0 ; ``ULONG_MAX``] | ``unsigned long``
 uint_base | An integer in range [0 ; ``UINT_MAX``] | ``unsigned int``
 ushort_base | An integer in range [0 ; ``USHRT_MAX``] | ``unsigned short``
 
-### Floating point
+#### Floating point
 
 Type name | Expected input | Actual type
 -|-|-
