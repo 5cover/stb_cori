@@ -2,13 +2,15 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 // #define CORI_DEFINITION static inline
-#define CORI_DEFAULT_INPUT_ERROR_HANDLER
+
+#include "stb_cori.h"
 #define CORI_IMPLEMENTATION
 #include "stb_cori.h"
 
-void handle_inputError(InputError error)
+void handle_exampleInputError(InputError error)
 {
     char *s;
     switch (error) {
@@ -20,14 +22,9 @@ void handle_inputError(InputError error)
     case IE_NUMBER_OUT_OF_BOUNDS: s = "Number out of bounds"; break;
     case IE_OUT_OF_MEMORY: s = "Out of memory"; break;
     case IE_UNSUPPORTED_BASE: s = "Unsupported numeric base"; break;
-    default: abort();
+    default: assert(!"Invalid InputError enum value");
     }
     puts(s);
-}
-
-void handle_exampleInputError(InputError error)
-{
-    printf("Error: %d\n", error);
 }
 
 int main()

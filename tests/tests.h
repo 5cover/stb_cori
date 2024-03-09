@@ -23,15 +23,15 @@ extern TestingResults g_testingResults;
 
 FILE *open_file(char const *filename, char const *mode);
 
-#define test_tryRead(inStream, outStream, typename, resultType, resultFormat, resultComparer, unsetResult,             \
-                     expectedError, expectedResult, ...)                                                               \
-    do {                                                                                                               \
-        resultType result = (unsetResult);                                                                             \
-        InputError error = tryRead_##typename##_from(&result __VA_OPT__(, ) __VA_ARGS__, (inStream));                  \
-        bool success = error == (expectedError) && resultComparer(result, (expectedResult));                           \
-        fprintf(outStream, "%s: %d = %d and " resultFormat " = " resultFormat "\t%d:%s\n",                             \
-                success ? (++g_testingResults.successCount, "SUCCESS") : (++g_testingResults.failureCount, "FAILURE"), \
-                error, (expectedError), result, (expectedResult), __LINE__, __FILE__);                                 \
+#define test_tryRead(inStream, outStream, typename, resultType, resultFormat, resultComparer, unsetResult,         \
+    expectedError, expectedResult, ...)                                                                            \
+    do {                                                                                                           \
+        resultType result = (unsetResult);                                                                         \
+        InputError error = tryRead_##typename##_from(&result __VA_OPT__(, ) __VA_ARGS__, (inStream));              \
+        bool success = error == (expectedError) && resultComparer(result, (expectedResult));                       \
+        fprintf(outStream, "%s: %d = %d and " resultFormat " = " resultFormat "\t%d:%s\n",                         \
+            success ? (++g_testingResults.successCount, "SUCCESS") : (++g_testingResults.failureCount, "FAILURE"), \
+            error, (expectedError), result, (expectedResult), __LINE__, __FILE__);                                 \
     } while (0)
 
 #define equalsComparer(a, b) ((a) == (b))

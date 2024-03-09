@@ -116,9 +116,9 @@ typedef void (*InputErrorHandler)(InputError);
 
 _cori_FOR_EACH_CONVERSION(_cori_DECLARE_READ_FUNCS, _cori_DECLARE_READ_FUNCS_WITH_ARGS)
 
-    CORI_DEFINITION void handle_inputError(InputError error);
+    // INTERNAL
 
-// INTERNAL
+    CORI_DEFINITION void _cori_default_inputError_handler(InputError error);
 
 CORI_DEFINITION bool _cori_is_stringLength_exactly(char const *, size_t);
 
@@ -164,11 +164,11 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *);
     }                                                                                                              \
     type read_##typename##_from(FILE *stream)                                                                      \
     {                                                                                                              \
-        return read_##typename##_handleErrors_from(handle_inputError, stream);                                     \
+        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stream);                 \
     }                                                                                                              \
     type read_##typename(void)                                                                                     \
     {                                                                                                              \
-        return read_##typename##_handleErrors_from(handle_inputError, stdin);                                      \
+        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stdin);                  \
     }                                                                                                              \
     type read_##typename##_handleErrors(InputErrorHandler inputErrorHandler)                                       \
     {                                                                                                              \
@@ -216,11 +216,11 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *);
     }                                                                                                                         \
     type read_##typename##_from(typedArgs, FILE *stream)                                                                      \
     {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, handle_inputError, stream);                                          \
+        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stream);                      \
     }                                                                                                                         \
     type read_##typename(typedArgs)                                                                                           \
     {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, handle_inputError, stdin);                                           \
+        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stdin);                       \
     }                                                                                                                         \
     type read_##typename##_handleErrors(typedArgs, InputErrorHandler inputErrorHandler)                                       \
     {                                                                                                                         \
@@ -247,19 +247,11 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *);
 
 _cori_FOR_EACH_CONVERSION(_cori_DEFINE_READ_FUNCS, _cori_DEFINE_READ_FUNCS_WITH_ARGS)
 
-// Skip if already defined by implementing code
-#ifndef CORI_DEFAULT_INPUT_ERROR_HANDLER
-    void handle_inputError(InputError error)
-{
-    (void)error;
-}
-#endif
+    // INTERNAL
 
-// INTERNAL
+    // Converters
 
-// Converters
-
-InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesChars, char const *noChars)
+    InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesChars, char const *noChars)
 {
     InputError error = _cori_getCharacterConversionError(str);
     if (error) {
@@ -534,6 +526,11 @@ InputError _cori_convert_float(char const *str, float *outResult)
 }
 
 // Utility functions
+
+void _cori_default_inputError_handler(InputError error)
+{
+    (void)error;
+}
 
 InputError _cori_get_numberConversionError(char const *str, char const *end)
 {

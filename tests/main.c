@@ -7,15 +7,11 @@
 #include <stdlib.h>
 
 #define CORI_IMPLEMENTATION
-#define CORI_DEFAULT_INPUT_ERROR_HANDLER
 #include "tests.h"
 
 #define OUT stdout
 
-void handle_inputError(InputError error)
-{
-    assert(error && "error was IE_OK");
-}
+
 
 int main()
 {

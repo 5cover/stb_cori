@@ -66,7 +66,7 @@ line | A string ended by a newline | ``char *`` (must be freed)
 
 Type name | Expected input | Actual type
 -|-|-
-bool | A character, present in one of the specified sets of characters representing either ``true`` or ``false`` | ``bool``
+boolean | A character, present in one of the specified sets of characters representing either ``true`` or ``false`` | ``bool``
 
 ### 2. How do I handle erroneous input?
 
@@ -77,12 +77,12 @@ Input can be erroneous in 2 ways:
 - Type error: the issued string cannot be meaningfully converted to the target type without assuming the intent of the user.\
 For example, while it may technically be possible to retrieve a single character if the user entered multiple, it's best to cause an error as it's certainly a mistake from the user.\
 When the input cannot be converted at all, such as trying to convert ``dfsfds`` into an integer, it's also a type error.
-- Logic error : the issued string has been converted successfully, but the resulting value isn't valid according to the logic of the program.\
+- Logic error: the issued string has been converted successfully, but the resulting value isn't valid according to the logic of the program.\
 For example, a file path that does not exist for a text editor.
 
-Cori only implements error handling for type errors.
-
 #### 1. I don't care about erroneous input
+
+This is the simplest approach. Useful for quick scripts and test programs.
 
 **Function name prefix**: ``read_<typename>``
 
@@ -95,24 +95,11 @@ printf("How old are you ? ");
 int result = read_int();
 ```
 
-If no default input error handler is specified, the error is simply swallowed. This means the user will get successive prompts with no message between them.
-
-To define a default input error handler, define the ``CORI_DEFAULT_INPUT_ERROR_HANDLER`` macro before including and define the ``void handle_inputError(InputError)`` function.
-
-Sample code:
-
-```c
-#define CORI_DEFAULT_INPUT_ERROR_HANDLER
-#define CORI_IMPLEMENTATION
-#include "stb_cori.h"
-
-void handle_inputError(InputError error)
-{
-    // ...
-}
-```
+Errors are ignored. This means the user will get successive prompts with no message between them.
 
 #### 2. I want to call a function on erroneous input and retry
+
+This approach is useful for sharing error handling logic across the program.
 
 **Function name**: ``read_<typename>_handleErrors``
 
@@ -120,7 +107,7 @@ void handle_inputError(InputError error)
 
 These functions take a function pointer parameter of type ``InputErrorHandler``, which is equivalent to ``void (*InputErrorHandler)(InputError)``.
 
-Basically, input error handlers take 1 argument, the error that occured, and returns nothing.
+So input error handlers take a single argument, the error that occured, and return nothing.
 
 ``InputError`` is an enumeration representing all possible error conditions. Its values are prefixed with ``IE_``.
 
@@ -153,6 +140,8 @@ void handle_inputError(InputError error)
 ```
 
 #### 3. I want maximum control: read the input once, and let me do the rest
+
+This approach is mainly useful for logic error handling and custom input restrictions.
 
 **Function name**: ``tryRead_<typename>``
 
