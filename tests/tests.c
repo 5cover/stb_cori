@@ -4,10 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-TestingResults g_testingResults = (TestingResults){
-    .failureCount = 0,
-    .successCount = 0,
-};
+TestingResults g_testingResults = { 0 };
 
 FILE *open_file(char const *filename, char const *mode)
 {

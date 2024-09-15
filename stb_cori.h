@@ -90,7 +90,7 @@ typedef void (*InputErrorHandler)(InputError);
     DO(_cori_read_rawLine, float, float)                                                  \
     /* Text */                                                                            \
     DO(_cori_read_rawLine, line, char *)                                                  \
-    DO_WITH_ARGS(_cori_read_rawDelim, delimitedString, char *, char delimiter, delimiter) \
+    DO_WITH_ARGS(_cori_read_rawDelim, until, char *, char delimiter, delimiter) \
     DO(_cori_read_rawLine, character, char)                                               \
     /* Other */                                                                           \
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
@@ -124,7 +124,7 @@ typedef void (*InputErrorHandler)(InputError);
     DO(_cori_read_rawLine, float, float)                                                  \
     /* Text */                                                                            \
     DO(_cori_read_rawLine, line, char *)                                                  \
-    /*DO_WITH_ARGS(_cori_read_rawDelim, delimitedString, char *, char delimiter, delimiter)*/ \
+    /*DO_WITH_ARGS(_cori_read_rawDelim, until, char *, char delimiter, delimiter)*/ \
     DO(_cori_read_rawLine, character, char)                                               \
     /* Other */                                                                           \
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
@@ -315,7 +315,7 @@ InputError _cori_convert_character(char const *str, char *outResult)
     return error;
 }
 
-InputError _cori_convert_delimitedString(char const *str, char **outResult, char delimiter)
+InputError _cori_convert_until(char const *str, char **outResult, char delimiter)
 {
     (void)delimiter;
     // Duplicate the string as the orginal one will be freed.

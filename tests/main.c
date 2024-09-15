@@ -22,7 +22,7 @@ int main()
     test_float(OUT);
     test_double(OUT);
     test_longdouble(OUT);
-    test_delimitedString(OUT);
+    test_until(OUT);
     test_intmax(OUT);
     test_longlong(OUT);
     test_long(OUT);

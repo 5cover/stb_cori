@@ -59,9 +59,9 @@ float | A real number | ``float``
 Type name | Expected input | Actual type | Additional parameters
 -|-|-|-
 character | Any character except a newline | ``char``
-delimitedString | A string ended by a specific character | ``char *`` (must be freed) | the delimiter (marks the end of the string, not included) (`char`)
+until | A string ended by a specific character | ``char *`` (must be freed) | the delimiter (marks the end of the string, not included) (`char`)
 line | A string ended by a newline | ``char *`` (must be freed)
-string | A string of a specific length | ``char *`` | the buffer for the string ``char *``, the size of the buffer (thus the maximum length of the string plus 1) (``size_t``)
+into | A string of a specific length | ``char *`` | the buffer for the string ``char *``, the size of the buffer (thus the maximum length of the string plus 1) (``size_t``)
 
 #### Other
 

@@ -43,7 +43,7 @@ void test_bool(FILE *);
 void test_float(FILE *);
 void test_double(FILE *);
 void test_longdouble(FILE *);
-void test_delimitedString(FILE *);
+void test_until(FILE *);
 void test_intmax(FILE *);
 void test_longlong(FILE *);
 void test_long(FILE *);
