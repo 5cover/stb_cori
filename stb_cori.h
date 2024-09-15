@@ -14,12 +14,12 @@
 
 #define __STDC_WANT_LIB_EXT2__ 1
 
-#include <stdio.h>
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -61,75 +61,74 @@ typedef void (*InputErrorHandler)(InputError);
 #define _cori_COMMA ,
 
 #if defined CORI_GETDELIM
-#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                       \
-    /* Signed integer */                                                                  \
-    DO(_cori_read_rawLine, intmax, intmax_t)                                              \
-    DO(_cori_read_rawLine, longlong, long long)                                           \
-    DO(_cori_read_rawLine, long, long)                                                    \
-    DO(_cori_read_rawLine, int, int)                                                      \
-    DO(_cori_read_rawLine, short, short)                                                  \
-    DO_WITH_ARGS(_cori_read_rawLine, intmax_base, intmax_t, int base, base)               \
-    DO_WITH_ARGS(_cori_read_rawLine, longlong_base, long long, int base, base)            \
-    DO_WITH_ARGS(_cori_read_rawLine, long_base, long, int base, base)                     \
-    DO_WITH_ARGS(_cori_read_rawLine, int_base, int, int base, base)                       \
-    DO_WITH_ARGS(_cori_read_rawLine, short_base, short, int base, base)                   \
-    /* Unsigned integer */                                                                \
-    DO(_cori_read_rawLine, uintmax, uintmax_t)                                            \
-    DO(_cori_read_rawLine, ulonglong, unsigned long long)                                 \
-    DO(_cori_read_rawLine, ulong, unsigned long)                                          \
-    DO(_cori_read_rawLine, uint, unsigned int)                                            \
-    DO(_cori_read_rawLine, ushort, unsigned short)                                        \
-    DO_WITH_ARGS(_cori_read_rawLine, uintmax_base, uintmax_t, int base, base)             \
-    DO_WITH_ARGS(_cori_read_rawLine, ulonglong_base, unsigned long long, int base, base)  \
-    DO_WITH_ARGS(_cori_read_rawLine, ulong_base, unsigned long, int base, base)           \
-    DO_WITH_ARGS(_cori_read_rawLine, uint_base, unsigned int, int base, base)             \
-    DO_WITH_ARGS(_cori_read_rawLine, ushort_base, unsigned short, int base, base)         \
-    /* Floating point */                                                                  \
-    DO(_cori_read_rawLine, longdouble, long double)                                       \
-    DO(_cori_read_rawLine, double, double)                                                \
-    DO(_cori_read_rawLine, float, float)                                                  \
-    /* Text */                                                                            \
-    DO(_cori_read_rawLine, line, char *)                                                  \
-    DO_WITH_ARGS(_cori_read_rawDelim, until, char *, char delimiter, delimiter) \
-    DO(_cori_read_rawLine, character, char)                                               \
-    /* Other */                                                                           \
+#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                      \
+    /* Signed integer */                                                                 \
+    DO(_cori_read_rawLine, intmax, intmax_t)                                             \
+    DO(_cori_read_rawLine, longlong, long long)                                          \
+    DO(_cori_read_rawLine, long, long)                                                   \
+    DO(_cori_read_rawLine, int, int)                                                     \
+    DO(_cori_read_rawLine, short, short)                                                 \
+    DO_WITH_ARGS(_cori_read_rawLine, intmax_base, intmax_t, int base, base)              \
+    DO_WITH_ARGS(_cori_read_rawLine, longlong_base, long long, int base, base)           \
+    DO_WITH_ARGS(_cori_read_rawLine, long_base, long, int base, base)                    \
+    DO_WITH_ARGS(_cori_read_rawLine, int_base, int, int base, base)                      \
+    DO_WITH_ARGS(_cori_read_rawLine, short_base, short, int base, base)                  \
+    /* Unsigned integer */                                                               \
+    DO(_cori_read_rawLine, uintmax, uintmax_t)                                           \
+    DO(_cori_read_rawLine, ulonglong, unsigned long long)                                \
+    DO(_cori_read_rawLine, ulong, unsigned long)                                         \
+    DO(_cori_read_rawLine, uint, unsigned int)                                           \
+    DO(_cori_read_rawLine, ushort, unsigned short)                                       \
+    DO_WITH_ARGS(_cori_read_rawLine, uintmax_base, uintmax_t, int base, base)            \
+    DO_WITH_ARGS(_cori_read_rawLine, ulonglong_base, unsigned long long, int base, base) \
+    DO_WITH_ARGS(_cori_read_rawLine, ulong_base, unsigned long, int base, base)          \
+    DO_WITH_ARGS(_cori_read_rawLine, uint_base, unsigned int, int base, base)            \
+    DO_WITH_ARGS(_cori_read_rawLine, ushort_base, unsigned short, int base, base)        \
+    /* Floating point */                                                                 \
+    DO(_cori_read_rawLine, longdouble, long double)                                      \
+    DO(_cori_read_rawLine, double, double)                                               \
+    DO(_cori_read_rawLine, float, float)                                                 \
+    /* Text */                                                                           \
+    DO(_cori_read_rawLine, line, char *)                                                 \
+    DO_WITH_ARGS(_cori_read_rawDelim, until, char *, char delimiter, delimiter)          \
+    DO(_cori_read_rawLine, character, char)                                              \
+    /* Other */                                                                          \
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
 #else
-#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                       \
-    /* Signed integer */                                                                  \
-    DO(_cori_read_rawLine, intmax, intmax_t)                                              \
-    DO(_cori_read_rawLine, longlong, long long)                                           \
-    DO(_cori_read_rawLine, long, long)                                                    \
-    DO(_cori_read_rawLine, int, int)                                                      \
-    DO(_cori_read_rawLine, short, short)                                                  \
-    DO_WITH_ARGS(_cori_read_rawLine, intmax_base, intmax_t, int base, base)               \
-    DO_WITH_ARGS(_cori_read_rawLine, longlong_base, long long, int base, base)            \
-    DO_WITH_ARGS(_cori_read_rawLine, long_base, long, int base, base)                     \
-    DO_WITH_ARGS(_cori_read_rawLine, int_base, int, int base, base)                       \
-    DO_WITH_ARGS(_cori_read_rawLine, short_base, short, int base, base)                   \
-    /* Unsigned integer */                                                                \
-    DO(_cori_read_rawLine, uintmax, uintmax_t)                                            \
-    DO(_cori_read_rawLine, ulonglong, unsigned long long)                                 \
-    DO(_cori_read_rawLine, ulong, unsigned long)                                          \
-    DO(_cori_read_rawLine, uint, unsigned int)                                            \
-    DO(_cori_read_rawLine, ushort, unsigned short)                                        \
-    DO_WITH_ARGS(_cori_read_rawLine, uintmax_base, uintmax_t, int base, base)             \
-    DO_WITH_ARGS(_cori_read_rawLine, ulonglong_base, unsigned long long, int base, base)  \
-    DO_WITH_ARGS(_cori_read_rawLine, ulong_base, unsigned long, int base, base)           \
-    DO_WITH_ARGS(_cori_read_rawLine, uint_base, unsigned int, int base, base)             \
-    DO_WITH_ARGS(_cori_read_rawLine, ushort_base, unsigned short, int base, base)         \
-    /* Floating point */                                                                  \
-    DO(_cori_read_rawLine, longdouble, long double)                                       \
-    DO(_cori_read_rawLine, double, double)                                                \
-    DO(_cori_read_rawLine, float, float)                                                  \
-    /* Text */                                                                            \
-    DO(_cori_read_rawLine, line, char *)                                                  \
-    /*DO_WITH_ARGS(_cori_read_rawDelim, until, char *, char delimiter, delimiter)*/ \
-    DO(_cori_read_rawLine, character, char)                                               \
-    /* Other */                                                                           \
+#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                      \
+    /* Signed integer */                                                                 \
+    DO(_cori_read_rawLine, intmax, intmax_t)                                             \
+    DO(_cori_read_rawLine, longlong, long long)                                          \
+    DO(_cori_read_rawLine, long, long)                                                   \
+    DO(_cori_read_rawLine, int, int)                                                     \
+    DO(_cori_read_rawLine, short, short)                                                 \
+    DO_WITH_ARGS(_cori_read_rawLine, intmax_base, intmax_t, int base, base)              \
+    DO_WITH_ARGS(_cori_read_rawLine, longlong_base, long long, int base, base)           \
+    DO_WITH_ARGS(_cori_read_rawLine, long_base, long, int base, base)                    \
+    DO_WITH_ARGS(_cori_read_rawLine, int_base, int, int base, base)                      \
+    DO_WITH_ARGS(_cori_read_rawLine, short_base, short, int base, base)                  \
+    /* Unsigned integer */                                                               \
+    DO(_cori_read_rawLine, uintmax, uintmax_t)                                           \
+    DO(_cori_read_rawLine, ulonglong, unsigned long long)                                \
+    DO(_cori_read_rawLine, ulong, unsigned long)                                         \
+    DO(_cori_read_rawLine, uint, unsigned int)                                           \
+    DO(_cori_read_rawLine, ushort, unsigned short)                                       \
+    DO_WITH_ARGS(_cori_read_rawLine, uintmax_base, uintmax_t, int base, base)            \
+    DO_WITH_ARGS(_cori_read_rawLine, ulonglong_base, unsigned long long, int base, base) \
+    DO_WITH_ARGS(_cori_read_rawLine, ulong_base, unsigned long, int base, base)          \
+    DO_WITH_ARGS(_cori_read_rawLine, uint_base, unsigned int, int base, base)            \
+    DO_WITH_ARGS(_cori_read_rawLine, ushort_base, unsigned short, int base, base)        \
+    /* Floating point */                                                                 \
+    DO(_cori_read_rawLine, longdouble, long double)                                      \
+    DO(_cori_read_rawLine, double, double)                                               \
+    DO(_cori_read_rawLine, float, float)                                                 \
+    /* Text */                                                                           \
+    DO(_cori_read_rawLine, line, char *)                                                 \
+    /*DO_WITH_ARGS(_cori_read_rawDelim, until, char *, char delimiter, delimiter)*/      \
+    DO(_cori_read_rawLine, character, char)                                              \
+    /* Other */                                                                          \
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
 #endif
-
 
 #define _cori_DECLARE_READ_FUNCS(readRawFunc, typename, type)                                                    \
     CORI_DEFINITION InputError tryRead_##typename(type * outResult);                                             \
@@ -203,11 +202,11 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *);
     }                                                                                                              \
     type read_##typename##_from(FILE *stream)                                                                      \
     {                                                                                                              \
-        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stream);                 \
+        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stream);                      \
     }                                                                                                              \
     type read_##typename(void)                                                                                     \
     {                                                                                                              \
-        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stdin);                  \
+        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stdin);                       \
     }                                                                                                              \
     type read_##typename##_handleErrors(InputErrorHandler inputErrorHandler)                                       \
     {                                                                                                              \
@@ -255,11 +254,11 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *);
     }                                                                                                                         \
     type read_##typename##_from(typedArgs, FILE *stream)                                                                      \
     {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stream);                      \
+        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stream);                           \
     }                                                                                                                         \
     type read_##typename(typedArgs)                                                                                           \
     {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stdin);                       \
+        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stdin);                            \
     }                                                                                                                         \
     type read_##typename##_handleErrors(typedArgs, InputErrorHandler inputErrorHandler)                                       \
     {                                                                                                                         \
@@ -286,11 +285,55 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *);
 
 _cori_FOR_EACH_CONVERSION(_cori_DEFINE_READ_FUNCS, _cori_DEFINE_READ_FUNCS_WITH_ARGS)
 
-    // INTERNAL
+char *read_linel_handleErrors_from(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler, FILE *stream);
+InputError tryRead_linel_from(char *buf, size_t bufsize, FILE *stream);
+char *read_linel_from(char *buf, size_t bufsize, FILE *stream);
+char *read_linel(char *buf, size_t bufsize);
+char *read_linel_handleErrors(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler);
+InputError tryRead_linel(char *buf, size_t bufsize);
+InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, FILE *stream);
 
-    // Converters
+char *read_linel_handleErrors_from(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler, FILE *stream)
+{
+    InputError error;
+    while ((error = _cori_tryRead_linel_impl(buf, bufsize, stream))) {
+        inputErrorHandler(error);
+    }
+    return buf;
+}
+InputError tryRead_linel_from(char *buf, size_t bufsize, FILE *stream)
+{
+    return _cori_tryRead_linel_impl(buf, bufsize, stream);
+}
+char *read_linel_from(char *buf, size_t bufsize, FILE *stream)
+{
+    return read_linel_handleErrors_from(buf, bufsize, _cori_default_inputError_handler, stream);
+}
+char *read_linel(char *buf, size_t bufsize)
+{
+    return read_linel_handleErrors_from(buf, bufsize, _cori_default_inputError_handler, stdin);
+}
+char *read_linel_handleErrors(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler)
+{
+    return read_linel_handleErrors_from(buf, bufsize, inputErrorHandler, stdin);
+}
+InputError tryRead_linel(char *buf, size_t bufsize)
+{
+    return tryRead_linel_from(buf, bufsize, stdin);
+}
+InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, FILE *stream)
+{
+    if (fgets(buf, bufsize, stream) == NULL) {
+        return IE_EOF;
+    }
+    return IE_OK;
+}
 
-    InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesChars, char const *noChars)
+// INTERNAL
+
+// Converters
+
+InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesChars, char const *noChars)
 {
     InputError error = _cori_getCharacterConversionError(str);
     if (error) {

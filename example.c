@@ -31,20 +31,27 @@ int main()
 {
     InputError error;
 
-    puts("Example: read");
+    puts("Example: read_linel");
+    {
+        char answer[26];
+        printf("Type the alphabet: ");
+        read_linel(answer, 26);
+        printf("Recieved %s\n", answer);
+    }
+    puts("Example: read_int");
     {
         int result;
         printf("Type an integer: ");
         result = read_int();
         printf("Recieved %d\n", result);
     }
-    puts("Example: read_handleErrors");
+    puts("Example: read_short_handleErrors");
     {
         printf("Type an integer (max %d): ", SHRT_MAX);
         short result = read_short_handleErrors(handle_exampleInputError);
         printf("Recieved %d\n", result);
     }
-    puts("Example: tryRead");
+    puts("Example: tryRead_int");
     {
         int result;
         do {
@@ -53,7 +60,7 @@ int main()
         } while (error || result >= 10);
         printf("Recieved %d\n", result);
     }
-    puts("Example: read_from");
+    puts("Example: read_line_from");
     {
         FILE *readme = fopen("README.md", "r");
         char *firstLine = read_line_from(readme);
@@ -66,6 +73,6 @@ int main()
         char const yesChars[] = "yY", noChars[] = "nN";
         printf("Do you like this library? ");
         bool result = read_bool(yesChars, noChars);
-        puts(result ? "Thank you" : "That's ok");
+        puts(result ? "Thank you" : "*Ernie prepares to commit a hate crime*");
     }
 }
