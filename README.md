@@ -18,55 +18,56 @@ Cori currently supports the following conversions:
 
 #### Signed integers
 
-Type name | Expected input | Actual type
--|-|-
+Type name | Expected input | Actual type | Additional parameters
+-|-|-|-
 intmax | An integer in range [``INTMAX_MIN`` ; ``INTMAX_MAX``] | ``intmax_t``
 longlong | An integer in range [``LLONG_MIN`` ; ``LLONG_MAX``] | ``long long``
 long | An integer in range [``LONG_MIN`` ; ``LONG_MAX``] | ``long``
 int | An integer in range [``INT_MIN`` ; ``INT_MAX``] | ``int``
 short | An integer in range [``SHRT_MIN`` ; ``SHRT_MAX``] | ``short``
-intmax_base | An integer in range [``INTMAX_MIN`` ; ``INTMAX_MAX``] in the specified base | ``intmax_t``
-longlong_base | An integer in range [``LLONG_MIN`` ; ``LLONG_MAX``] in the specified base | ``long long``
-long_base | An integer in range [``LONG_MIN`` ; ``LONG_MAX``] in the specified base | ``long``
-int_base | An integer in range [``INT_MIN`` ; ``INT_MAX``] in the specified base | ``int``
-short_base | An integer in range [``SHRT_MIN`` ; ``SHRT_MAX``] in the specified base | ``short``
+intmax_base | An integer in range [``INTMAX_MIN`` ; ``INTMAX_MAX``] | ``intmax_t`` | the number base (`int`)
+longlong_base | An integer in range [``LLONG_MIN`` ; ``LLONG_MAX``] | ``long long`` | the number base (`int`)
+long_base | An integer in range [``LONG_MIN`` ; ``LONG_MAX``] | ``long`` | the number base (`int`)
+int_base | An integer in range [``INT_MIN`` ; ``INT_MAX``] | ``int`` | the number base (`int`)
+short_base | An integer in range [``SHRT_MIN`` ; ``SHRT_MAX``] | ``short`` | the number base (`int`)
 
 #### Unsigned integers
 
-Type name | Expected input | Actual type
--|-|-
+Type name | Expected input | Actual type | Additional parameters
+-|-|-|-
 uintmax | An integer in range [0 ; ``UINTMAX_MAX``] | ``uintmax_t``
 ulonglong | An integer in range [0 ; ``ULLONG_MAX``] | ``unsigned long long``
 ulong | An integer in range [0 ; ``ULONG_MAX``] | ``unsigned long``
 uint | An integer in range [0 ; ``UINT_MAX``] | ``unsigned int``
 ushort | An integer in range [0 ; ``USHRT_MAX``] | ``unsigned short``
-uintmax_base | An integer in range [0 ; ``UINTMAX_MAX``] | ``uintmax_t``
-ulonglong_base | An integer in range [0 ; ``ULLONG_MAX``] | ``unsigned long long``
-ulong_base | An integer in range [0 ; ``ULONG_MAX``] | ``unsigned long``
-uint_base | An integer in range [0 ; ``UINT_MAX``] | ``unsigned int``
-ushort_base | An integer in range [0 ; ``USHRT_MAX``] | ``unsigned short``
+uintmax_base | An integer in range [0 ; ``UINTMAX_MAX``] | ``uintmax_t`` | the number base (`int`)
+ulonglong_base | An integer in range [0 ; ``ULLONG_MAX``] | ``unsigned long long`` | the number base (`int`)
+ulong_base | An integer in range [0 ; ``ULONG_MAX``] | ``unsigned long`` | the number base (`int`)
+uint_base | An integer in range [0 ; ``UINT_MAX``] | ``unsigned int`` | the number base (`int`)
+ushort_base | An integer in range [0 ; ``USHRT_MAX``] | ``unsigned short`` | the number base (`int`)
 
 #### Floating point
 
-Type name | Expected input | Actual type
--|-|-
+Type name | Expected input | Actual type | Additional parameters
+-|-|-|-
 longdouble | A real number | ``long double``
 double | A real number | ``double``
 float | A real number | ``float``
 
 #### Text
 
-Type name | Expected input | Actual type
--|-|-
+Type name | Expected input | Actual type | Additional parameters
+-|-|-|-
 character | Any character except a newline | ``char``
-delimitedString | A string ended by the specified character | ``char *`` (must be freed)
+delimitedString | A string ended by a specific character | ``char *`` (must be freed) | the delimiter (marks the end of the string, not included) (`char`)
 line | A string ended by a newline | ``char *`` (must be freed)
+string | A string of a specific length | ``char *`` | the buffer for the string ``char *``, the size of the buffer (thus the maximum length of the string plus 1) (``size_t``)
 
 #### Other
 
-Type name | Expected input | Actual type
--|-|-
-boolean | A character, present in one of the specified sets of characters representing either ``true`` or ``false`` | ``bool``
+Type name | Expected input | Actual type | Additional parameters
+-|-|-|-
+boolean | A character, present in one of the specified sets of characters representing either ``true`` or ``false`` | ``bool`` | the set of characters representing `true` (`char const *`), the set of characters representing `false` (`char const *`)
 
 ### 2. How do I handle erroneous input?
 

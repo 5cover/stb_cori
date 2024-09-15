@@ -10,23 +10,23 @@
 #ifndef STB_CORI_H_
 #define STB_CORI_H_
 
-// This is needed to use getdelim in a standard-compliant way
-#ifdef __STDC_ALLOC_LIB__
+#define STB_CORI_VERSION "1.1.0"
+
 #define __STDC_WANT_LIB_EXT2__ 1
-#elif !defined _POSIX_C_SOURCE // Don't overwrite value given by implementing code
-#define _POSIX_C_SOURCE 200809L
-#endif
 
-#define STB_CORI_VERSION "1.0.0"
-
+#include <stdio.h>
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// This is needed to use getdelim in a standard-compliant way
+#if _POSIX_C_SOURCE >= 200809L || defined __STDC_ALLOC_LIB__
+#define CORI_GETDELIM
+#endif
 
 #ifndef CORI_DEFINITION
 /// \brief Defines modifier keywords for the definitions. Example value: static inline
@@ -60,6 +60,7 @@ typedef void (*InputErrorHandler)(InputError);
 /// \brief Helps pass commas in macro arguments.
 #define _cori_COMMA ,
 
+#if defined CORI_GETDELIM
 #define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                       \
     /* Signed integer */                                                                  \
     DO(_cori_read_rawLine, intmax, intmax_t)                                              \
@@ -93,6 +94,42 @@ typedef void (*InputErrorHandler)(InputError);
     DO(_cori_read_rawLine, character, char)                                               \
     /* Other */                                                                           \
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
+#else
+#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                       \
+    /* Signed integer */                                                                  \
+    DO(_cori_read_rawLine, intmax, intmax_t)                                              \
+    DO(_cori_read_rawLine, longlong, long long)                                           \
+    DO(_cori_read_rawLine, long, long)                                                    \
+    DO(_cori_read_rawLine, int, int)                                                      \
+    DO(_cori_read_rawLine, short, short)                                                  \
+    DO_WITH_ARGS(_cori_read_rawLine, intmax_base, intmax_t, int base, base)               \
+    DO_WITH_ARGS(_cori_read_rawLine, longlong_base, long long, int base, base)            \
+    DO_WITH_ARGS(_cori_read_rawLine, long_base, long, int base, base)                     \
+    DO_WITH_ARGS(_cori_read_rawLine, int_base, int, int base, base)                       \
+    DO_WITH_ARGS(_cori_read_rawLine, short_base, short, int base, base)                   \
+    /* Unsigned integer */                                                                \
+    DO(_cori_read_rawLine, uintmax, uintmax_t)                                            \
+    DO(_cori_read_rawLine, ulonglong, unsigned long long)                                 \
+    DO(_cori_read_rawLine, ulong, unsigned long)                                          \
+    DO(_cori_read_rawLine, uint, unsigned int)                                            \
+    DO(_cori_read_rawLine, ushort, unsigned short)                                        \
+    DO_WITH_ARGS(_cori_read_rawLine, uintmax_base, uintmax_t, int base, base)             \
+    DO_WITH_ARGS(_cori_read_rawLine, ulonglong_base, unsigned long long, int base, base)  \
+    DO_WITH_ARGS(_cori_read_rawLine, ulong_base, unsigned long, int base, base)           \
+    DO_WITH_ARGS(_cori_read_rawLine, uint_base, unsigned int, int base, base)             \
+    DO_WITH_ARGS(_cori_read_rawLine, ushort_base, unsigned short, int base, base)         \
+    /* Floating point */                                                                  \
+    DO(_cori_read_rawLine, longdouble, long double)                                       \
+    DO(_cori_read_rawLine, double, double)                                                \
+    DO(_cori_read_rawLine, float, float)                                                  \
+    /* Text */                                                                            \
+    DO(_cori_read_rawLine, line, char *)                                                  \
+    /*DO_WITH_ARGS(_cori_read_rawDelim, delimitedString, char *, char delimiter, delimiter)*/ \
+    DO(_cori_read_rawLine, character, char)                                               \
+    /* Other */                                                                           \
+    DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
+#endif
+
 
 #define _cori_DECLARE_READ_FUNCS(readRawFunc, typename, type)                                                    \
     CORI_DEFINITION InputError tryRead_##typename(type * outResult);                                             \
@@ -126,7 +163,9 @@ CORI_DEFINITION InputError _cori_getCharacterConversionError(char const *);
 
 CORI_DEFINITION InputError _cori_get_numberConversionError(char const *, char const *);
 
+#if defined CORI_GETDELIM
 CORI_DEFINITION InputError _cori_read_rawDelim(char **, size_t *, FILE *, int, ...);
+#endif
 
 CORI_DEFINITION InputError _cori_read_rawLine(char **, size_t *, FILE *, ...);
 
@@ -557,6 +596,7 @@ InputError _cori_getCharacterConversionError(char const *buffer)
     return IE_OK;
 }
 
+#if defined CORI_GETDELIM
 InputError _cori_read_rawLine(char **pBuffer, size_t *pBufferSize, FILE *stream, ...)
 {
     return _cori_read_rawDelim(pBuffer, pBufferSize, stream, '\n');
@@ -577,6 +617,7 @@ InputError _cori_read_rawDelim(char **pBuffer, size_t *pBufferSize, FILE *stream
     }
     return IE_OK;
 }
+#endif
 
 void _cori_remove_lastChar(char *str)
 {
