@@ -1,9 +1,9 @@
-/** \file
- * \author 5cover (Scover)
- * \brief Helper console input functions with error handling.
- * \copyright Public Domain - The Unlicense
- * \date 3/10/2023
- * \details
+/** @file
+ * @author 5cover (Scover)
+ * @brief Helper console input functions with error handling.
+ * @copyright Public Domain - The Unlicense
+ * @date 3/10/2023
+ * @details
  * See README.md for details and usage.
  */
 
@@ -29,38 +29,38 @@
 #endif
 
 #ifndef CORI_DEFINITION
-/// \brief Defines modifier keywords for the definitions. Example value: static inline
+/// @brief Defines modifier keywords for the definitions. Example value: static inline
 #define CORI_DEFINITION
 #endif
 
 typedef enum {
-    /// \brief No error.
+    /// @brief No error.
     IE_OK = 0,
-    /// \brief Issued string empty.
+    /// @brief Issued string empty.
     IE_EMPTY,
-    /// \brief EOF encountered while reading.
+    /// @brief EOF encountered while reading.
     IE_EOF,
-    /// \brief Unrecognized boolean char.
+    /// @brief Unrecognized boolean char.
     IE_INVALID_BOOL_CHAR,
-    /// \brief Multiple chars were issued.
+    /// @brief Multiple chars were issued.
     IE_MULTIPLE_CHARS,
-    /// \brief Issued value is not a number.
+    /// @brief Issued value is not a number.
     IE_NOT_A_NUMBER,
-    /// \brief Issued number is out of bounds.
+    /// @brief Issued number is out of bounds.
     IE_NUMBER_OUT_OF_BOUNDS,
-    /// \brief Out of memory condition.
+    /// @brief Out of memory condition.
     IE_OUT_OF_MEMORY,
-    /// \brief Unsupported numeric base.
+    /// @brief Unsupported numeric base.
     IE_UNSUPPORTED_BASE
 } InputError;
 
-/// \brief Input error handler procedure.
+/// @brief Input error handler procedure.
 typedef void (*InputErrorHandler)(InputError);
 
 CORI_DEFINITION void cori_handle_error_noop(InputError);
 CORI_DEFINITION void cori_handle_error_stderr_msg(InputError);
 
-/// \brief Helps pass commas in macro arguments.
+/// @brief Helps pass commas in macro arguments.
 #define _cori_COMMA ,
 
 #if defined CORI_GETDELIM
@@ -133,19 +133,19 @@ CORI_DEFINITION void cori_handle_error_stderr_msg(InputError);
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
 #endif
 
-#define _cori_DECLARE_READ_FUNCS(readRawFunc, typename, type)                            \
-    CORI_DEFINITION InputError tryRead_##typename(type *);                               \
-    CORI_DEFINITION InputError tryRead_##typename##_from(type *, FILE *);                \
-    CORI_DEFINITION type read_##typename(void);                                          \
-    CORI_DEFINITION type read_##typename##_from(FILE *);                                 \
+#define _cori_DECLARE_READ_FUNCS(readRawFunc, typename, type)                  \
+    CORI_DEFINITION InputError tryRead_##typename(type *);                     \
+    CORI_DEFINITION InputError tryRead_##typename##_from(type *, FILE *);      \
+    CORI_DEFINITION type read_##typename(void);                                \
+    CORI_DEFINITION type read_##typename##_from(FILE *);                       \
     CORI_DEFINITION type read_##typename##_or_from(InputErrorHandler, FILE *); \
     CORI_DEFINITION type read_##typename##_or(InputErrorHandler);
 
-#define _cori_DECLARE_READ_FUNCS_WITH_ARGS(readRawFunc, typename, type, typedArgs, args)            \
-    CORI_DEFINITION InputError tryRead_##typename(type *, typedArgs);                               \
-    CORI_DEFINITION InputError tryRead_##typename##_from(type *, typedArgs, FILE *);                \
-    CORI_DEFINITION type read_##typename(typedArgs);                                                \
-    CORI_DEFINITION type read_##typename##_from(typedArgs, FILE *);                                 \
+#define _cori_DECLARE_READ_FUNCS_WITH_ARGS(readRawFunc, typename, type, typedArgs, args)  \
+    CORI_DEFINITION InputError tryRead_##typename(type *, typedArgs);                     \
+    CORI_DEFINITION InputError tryRead_##typename##_from(type *, typedArgs, FILE *);      \
+    CORI_DEFINITION type read_##typename(typedArgs);                                      \
+    CORI_DEFINITION type read_##typename##_from(typedArgs, FILE *);                       \
     CORI_DEFINITION type read_##typename##_or_from(typedArgs, InputErrorHandler, FILE *); \
     CORI_DEFINITION type read_##typename##_or(typedArgs, InputErrorHandler);
 
@@ -595,7 +595,7 @@ void cori_handle_error_stderr_msg(InputError error)
         *outResult = result;                                                                                                       \
         return IE_OK;                                                                                                              \
     }                                                                                                                              \
-    type read_##typename##_or_from(InputErrorHandler inputErrorHandler, FILE *stream)                                    \
+    type read_##typename##_or_from(InputErrorHandler inputErrorHandler, FILE *stream)                                              \
     {                                                                                                                              \
         char *buffer = NULL;                                                                                                       \
         size_t bufferSize = 0;                                                                                                     \
@@ -617,15 +617,15 @@ void cori_handle_error_stderr_msg(InputError error)
     }                                                                                                                              \
     type read_##typename##_from(FILE *stream)                                                                                      \
     {                                                                                                                              \
-        return read_##typename##_or_from(cori_handle_error_noop, stream);                                               \
+        return read_##typename##_or_from(cori_handle_error_noop, stream);                                                          \
     }                                                                                                                              \
     type read_##typename(void)                                                                                                     \
     {                                                                                                                              \
-        return read_##typename##_or_from(cori_handle_error_noop, stdin);                                                \
+        return read_##typename##_or_from(cori_handle_error_noop, stdin);                                                           \
     }                                                                                                                              \
-    type read_##typename##_or(InputErrorHandler inputErrorHandler)                                                       \
+    type read_##typename##_or(InputErrorHandler inputErrorHandler)                                                                 \
     {                                                                                                                              \
-        return read_##typename##_or_from(inputErrorHandler, stdin);                                                      \
+        return read_##typename##_or_from(inputErrorHandler, stdin);                                                                \
     }                                                                                                                              \
     InputError tryRead_##typename(type * outResult)                                                                                \
     {                                                                                                                              \
@@ -647,7 +647,7 @@ void cori_handle_error_stderr_msg(InputError error)
         *outResult = result;                                                                                                                  \
         return IE_OK;                                                                                                                         \
     }                                                                                                                                         \
-    type read_##typename##_or_from(typedArgs, InputErrorHandler inputErrorHandler, FILE *stream)                                    \
+    type read_##typename##_or_from(typedArgs, InputErrorHandler inputErrorHandler, FILE *stream)                                              \
     {                                                                                                                                         \
         char *buffer = NULL;                                                                                                                  \
         size_t bufferSize = 0;                                                                                                                \
@@ -669,15 +669,15 @@ void cori_handle_error_stderr_msg(InputError error)
     }                                                                                                                                         \
     type read_##typename##_from(typedArgs, FILE *stream)                                                                                      \
     {                                                                                                                                         \
-        return read_##typename##_or_from(args, cori_handle_error_noop, stream);                                                    \
+        return read_##typename##_or_from(args, cori_handle_error_noop, stream);                                                               \
     }                                                                                                                                         \
     type read_##typename(typedArgs)                                                                                                           \
     {                                                                                                                                         \
-        return read_##typename##_or_from(args, cori_handle_error_noop, stdin);                                                     \
+        return read_##typename##_or_from(args, cori_handle_error_noop, stdin);                                                                \
     }                                                                                                                                         \
-    type read_##typename##_or(typedArgs, InputErrorHandler inputErrorHandler)                                                       \
+    type read_##typename##_or(typedArgs, InputErrorHandler inputErrorHandler)                                                                 \
     {                                                                                                                                         \
-        return read_##typename##_or_from(args, inputErrorHandler, stdin);                                                           \
+        return read_##typename##_or_from(args, inputErrorHandler, stdin);                                                                     \
     }                                                                                                                                         \
     InputError tryRead_##typename(type * outResult, typedArgs)                                                                                \
     {                                                                                                                                         \
