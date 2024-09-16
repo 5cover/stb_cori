@@ -87,7 +87,7 @@ This is the simplest approach. Useful for quick scripts and test programs.
 
 **Function name prefix**: ``read_<typename>``
 
-**Behavior on erroneous input**: calls the default input error handler and retries.
+**Behavior on erroneous input**: calls the NO-OP input error handler and retries.
 
 Sample code:
 
@@ -102,7 +102,7 @@ Errors are ignored. This means the user will get successive prompts with no mess
 
 This approach is useful for sharing error handling logic across the program.
 
-**Function name**: ``read_<typename>_handleErrors``
+**Function name**: ``read_<typename>_or``
 
 **Behavior on erroneous input**: calls the specified input error handler and retries.
 
@@ -116,13 +116,13 @@ Sample code:
 
 ```c
 printf("How old are you ? ");
-int result = read_int_handleErrors(&handle_inputError);
+int result = read_int_or(&inputErrorHandler);
 ```
 
 Sample input eror handler:
 
 ```c
-void handle_inputError(InputError error)
+void inputErrorHandler(InputError error)
 {
     char *s = NULL;
     switch (error) {
@@ -139,6 +139,13 @@ void handle_inputError(InputError error)
     puts(s);
 }
 ```
+
+Two predefined input error handler functions are available:
+
+name|description
+-|-
+cori_handle_error_noop|Does nothing
+cori_handle_error_stderr_msg|Prints a message to standard error
 
 #### 3. I want maximum control: read the input once, and let me do the rest
 
@@ -165,7 +172,7 @@ int result;
 do {
     printf("How old are you ? ");
     error = tryRead_int(&result);
-    handle_inputError(error);
+    inputErrorHandler(error);
 } while (error);
 printf("You're %d.\n", (int)result);
 ```

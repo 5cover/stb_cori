@@ -10,7 +10,7 @@
 #ifndef STB_CORI_H_
 #define STB_CORI_H_
 
-#define STB_CORI_VERSION "1.1.0"
+#define STB_CORI_VERSION "1.2.0"
 
 #define __STDC_WANT_LIB_EXT2__ 1
 
@@ -57,11 +57,14 @@ typedef enum {
 /// \brief Input error handler procedure.
 typedef void (*InputErrorHandler)(InputError);
 
+CORI_DEFINITION void cori_handle_error_noop(InputError);
+CORI_DEFINITION void cori_handle_error_stderr_msg(InputError);
+
 /// \brief Helps pass commas in macro arguments.
 #define _cori_COMMA ,
 
 #if defined CORI_GETDELIM
-#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                      \
+#define _cori_FOREACH_CONVERSION(DO, DO_WITH_ARGS)                                       \
     /* Signed integer */                                                                 \
     DO(_cori_read_rawLine, intmax, intmax_t)                                             \
     DO(_cori_read_rawLine, longlong, long long)                                          \
@@ -95,7 +98,7 @@ typedef void (*InputErrorHandler)(InputError);
     /* Other */                                                                          \
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
 #else
-#define _cori_FOR_EACH_CONVERSION(DO, DO_WITH_ARGS)                                      \
+#define _cori_FOREACH_CONVERSION(DO, DO_WITH_ARGS)                                       \
     /* Signed integer */                                                                 \
     DO(_cori_read_rawLine, intmax, intmax_t)                                             \
     DO(_cori_read_rawLine, longlong, long long)                                          \
@@ -130,170 +133,121 @@ typedef void (*InputErrorHandler)(InputError);
     DO_WITH_ARGS(_cori_read_rawLine, bool, bool, char const *yesChars _cori_COMMA char const *noChars, yesChars _cori_COMMA noChars)
 #endif
 
-#define _cori_DECLARE_READ_FUNCS(readRawFunc, typename, type)                                                    \
-    CORI_DEFINITION InputError tryRead_##typename(type * outResult);                                             \
-    CORI_DEFINITION InputError tryRead_##typename##_from(type *outResult, FILE *stream);                         \
-    CORI_DEFINITION type read_##typename(void);                                                                  \
-    CORI_DEFINITION type read_##typename##_from(FILE *stream);                                                   \
-    CORI_DEFINITION type read_##typename##_handleErrors_from(InputErrorHandler inputErrorHandler, FILE *stream); \
-    CORI_DEFINITION type read_##typename##_handleErrors(InputErrorHandler inputErrorHandler);                    \
-    CORI_DEFINITION InputError _cori_convert_##typename(char const *str, type *outResult);                       \
-    CORI_DEFINITION InputError _cori_tryRead_##typename##_impl(char **pBuffer, size_t *pBufferSize, type *outResult, FILE *stream);
+#define _cori_DECLARE_READ_FUNCS(readRawFunc, typename, type)                            \
+    CORI_DEFINITION InputError tryRead_##typename(type *);                               \
+    CORI_DEFINITION InputError tryRead_##typename##_from(type *, FILE *);                \
+    CORI_DEFINITION type read_##typename(void);                                          \
+    CORI_DEFINITION type read_##typename##_from(FILE *);                                 \
+    CORI_DEFINITION type read_##typename##_or_from(InputErrorHandler, FILE *); \
+    CORI_DEFINITION type read_##typename##_or(InputErrorHandler);
 
-#define _cori_DECLARE_READ_FUNCS_WITH_ARGS(readRawFunc, typename, type, typedArgs, args)                                    \
-    CORI_DEFINITION InputError tryRead_##typename(type * outResult, typedArgs);                                             \
-    CORI_DEFINITION InputError tryRead_##typename##_from(type *outResult, typedArgs, FILE *stream);                         \
-    CORI_DEFINITION type read_##typename(typedArgs);                                                                        \
-    CORI_DEFINITION type read_##typename##_from(typedArgs, FILE *stream);                                                   \
-    CORI_DEFINITION type read_##typename##_handleErrors_from(typedArgs, InputErrorHandler inputErrorHandler, FILE *stream); \
-    CORI_DEFINITION type read_##typename##_handleErrors(typedArgs, InputErrorHandler inputErrorHandler);                    \
-    CORI_DEFINITION InputError _cori_convert_##typename(char const *str, type *outResult, typedArgs);                       \
-    CORI_DEFINITION InputError _cori_tryRead_##typename##_impl(char **pBuffer, size_t *pBufferSize, type *outResult, typedArgs, FILE *stream);
+#define _cori_DECLARE_READ_FUNCS_WITH_ARGS(readRawFunc, typename, type, typedArgs, args)            \
+    CORI_DEFINITION InputError tryRead_##typename(type *, typedArgs);                               \
+    CORI_DEFINITION InputError tryRead_##typename##_from(type *, typedArgs, FILE *);                \
+    CORI_DEFINITION type read_##typename(typedArgs);                                                \
+    CORI_DEFINITION type read_##typename##_from(typedArgs, FILE *);                                 \
+    CORI_DEFINITION type read_##typename##_or_from(typedArgs, InputErrorHandler, FILE *); \
+    CORI_DEFINITION type read_##typename##_or(typedArgs, InputErrorHandler);
 
-_cori_FOR_EACH_CONVERSION(_cori_DECLARE_READ_FUNCS, _cori_DECLARE_READ_FUNCS_WITH_ARGS)
+_cori_FOREACH_CONVERSION(_cori_DECLARE_READ_FUNCS, _cori_DECLARE_READ_FUNCS_WITH_ARGS)
 
-    // INTERNAL
+    // Necessary as strtoul functions don't handle negative input
+    CORI_DEFINITION InputError _cori_deny_negative(char const *);
 
-    CORI_DEFINITION void _cori_default_inputError_handler(InputError error);
-
-CORI_DEFINITION bool _cori_is_stringLength_exactly(char const *, size_t);
-
-CORI_DEFINITION InputError _cori_getCharacterConversionError(char const *);
-
-CORI_DEFINITION InputError _cori_get_numberConversionError(char const *, char const *);
-
-#if defined CORI_GETDELIM
-CORI_DEFINITION InputError _cori_read_rawDelim(char **, size_t *, FILE *, int, ...);
-#endif
-
-CORI_DEFINITION InputError _cori_read_rawLine(char **, size_t *, FILE *, ...);
-
-CORI_DEFINITION void _cori_remove_lastChar(char *);
-
-// Necessary as strtoul functions don't handle negative input
-CORI_DEFINITION InputError _cori_deny_negative(char const *);
+CORI_DEFINITION char *read_linel_from(char *, size_t, FILE *);
+CORI_DEFINITION char *read_linel_or_from(char *, size_t, InputErrorHandler, FILE *);
+CORI_DEFINITION char *read_linel_or(char *, size_t, InputErrorHandler);
+CORI_DEFINITION char *read_linel(char *, size_t);
+CORI_DEFINITION InputError tryRead_linel_from(char *, size_t, FILE *);
+CORI_DEFINITION InputError tryRead_linel(char *, size_t);
 
 #endif // STB_CORI_H_
 
 #ifdef CORI_IMPLEMENTATION
 
+// Utilities
+
+CORI_DEFINITION bool _cori_is_stringLength_exactly(char const *str, size_t length)
+{
+    size_t measuredLength = 0;
+    char const *pCurrent = str;
+    while (measuredLength < length && *pCurrent != '\0') {
+        ++measuredLength;
+        ++pCurrent;
+    }
+    return length == measuredLength && *pCurrent == '\0';
+}
+
+CORI_DEFINITION InputError _cori_get_numberConversionError(char const *str, char const *end)
+{
+    if (errno == ERANGE) {
+        return IE_NUMBER_OUT_OF_BOUNDS;
+    } else if (errno == EINVAL) {
+        return IE_UNSUPPORTED_BASE;
+    } else if (*end != '\0' && *end != '\n') {
+        return IE_NOT_A_NUMBER;
+    } else if (str == end) {
+        return IE_EMPTY;
+    }
+    return IE_OK;
+}
+
+CORI_DEFINITION InputError _cori_getCharacterConversionError(char const *buffer)
+{
+    // Accout for terminating newline
+    if (_cori_is_stringLength_exactly(buffer, 1)) {
+        return IE_EMPTY;
+    } else if (!_cori_is_stringLength_exactly(buffer, 2)) {
+        return IE_MULTIPLE_CHARS;
+    }
+    return IE_OK;
+}
+
+#if defined CORI_GETDELIM
+CORI_DEFINITION InputError _cori_read_rawDelim(char **pBuffer, size_t *pBufferSize, FILE *stream, int delimiter, ...)
+{
+    errno = 0;
+    if (getdelim(pBuffer, pBufferSize, delimiter, stream) == -1) {
+        if (errno == ENOMEM) {
+            return IE_OUT_OF_MEMORY;
+        }
+        // Ctrl+D hit: push newline to avoid infinite loop.
+        ungetc('\n', stream);
+        // Read it back and trigger input prompt
+        getc(stream);
+        return IE_EOF;
+    }
+    return IE_OK;
+}
+
+CORI_DEFINITION InputError _cori_read_rawLine(char **pBuffer, size_t *pBufferSize, FILE *stream, ...)
+{
+    return _cori_read_rawDelim(pBuffer, pBufferSize, stream, '\n');
+}
+#endif
+
+CORI_DEFINITION void _cori_remove_lastChar(char *str)
+{
+    assert(str != NULL);
+    str[strlen(str) - 1] = '\0';
+}
+
+CORI_DEFINITION InputError _cori_deny_negative(char const *str)
+{
+    return str[0] == '-' ? IE_NUMBER_OUT_OF_BOUNDS : IE_OK;
+}
+
 // Read functions definitions
 
-#define _cori_DEFINE_READ_FUNCS(readRawFunc, typename, type)                                                       \
-    type read_##typename##_handleErrors_from(InputErrorHandler inputErrorHandler, FILE *stream)                    \
-    {                                                                                                              \
-        char *buffer = NULL;                                                                                       \
-        size_t bufferSize = 0;                                                                                     \
-        type result;                                                                                               \
-        InputError error;                                                                                          \
-        while ((error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, &result, stream))) {                 \
-            inputErrorHandler(error);                                                                              \
-        }                                                                                                          \
-        free(buffer);                                                                                              \
-        return result;                                                                                             \
-    }                                                                                                              \
-    InputError tryRead_##typename##_from(type *outResult, FILE *stream)                                            \
-    {                                                                                                              \
-        char *buffer = NULL;                                                                                       \
-        size_t bufferSize = 0;                                                                                     \
-        InputError error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, outResult, stream);               \
-        free(buffer);                                                                                              \
-        return error;                                                                                              \
-    }                                                                                                              \
-    type read_##typename##_from(FILE *stream)                                                                      \
-    {                                                                                                              \
-        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stream);                      \
-    }                                                                                                              \
-    type read_##typename(void)                                                                                     \
-    {                                                                                                              \
-        return read_##typename##_handleErrors_from(_cori_default_inputError_handler, stdin);                       \
-    }                                                                                                              \
-    type read_##typename##_handleErrors(InputErrorHandler inputErrorHandler)                                       \
-    {                                                                                                              \
-        return read_##typename##_handleErrors_from(inputErrorHandler, stdin);                                      \
-    }                                                                                                              \
-    InputError tryRead_##typename(type * outResult)                                                                \
-    {                                                                                                              \
-        return tryRead_##typename##_from(outResult, stdin);                                                        \
-    }                                                                                                              \
-    InputError _cori_tryRead_##typename##_impl(char **pBuffer, size_t *pBufferSize, type *outResult, FILE *stream) \
-    {                                                                                                              \
-        InputError error = readRawFunc(pBuffer, pBufferSize, stream);                                              \
-        if (error) {                                                                                               \
-            return error;                                                                                          \
-        }                                                                                                          \
-        type result;                                                                                               \
-        error = _cori_convert_##typename(*pBuffer, &result);                                                       \
-        if (error) {                                                                                               \
-            return error;                                                                                          \
-        }                                                                                                          \
-        *outResult = result;                                                                                       \
-        return IE_OK;                                                                                              \
+CORI_DEFINITION InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, FILE *stream)
+{
+    if (fgets(buf, bufsize, stream) == NULL) {
+        return IE_EOF;
     }
+    return IE_OK;
+}
 
-#define _cori_DEFINE_READ_FUNCS_WITH_ARGS(readRawFunc, typename, type, typedArgs, args)                                       \
-    type read_##typename##_handleErrors_from(typedArgs, InputErrorHandler inputErrorHandler, FILE *stream)                    \
-    {                                                                                                                         \
-        char *buffer = NULL;                                                                                                  \
-        size_t bufferSize = 0;                                                                                                \
-        type result;                                                                                                          \
-        InputError error;                                                                                                     \
-        while ((error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, &result, args, stream))) {                      \
-            inputErrorHandler(error);                                                                                         \
-        }                                                                                                                     \
-        free(buffer);                                                                                                         \
-        return result;                                                                                                        \
-    }                                                                                                                         \
-    InputError tryRead_##typename##_from(type *outResult, typedArgs, FILE *stream)                                            \
-    {                                                                                                                         \
-        char *buffer = NULL;                                                                                                  \
-        size_t bufferSize = 0;                                                                                                \
-        InputError error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, outResult, args, stream);                    \
-        free(buffer);                                                                                                         \
-        return error;                                                                                                         \
-    }                                                                                                                         \
-    type read_##typename##_from(typedArgs, FILE *stream)                                                                      \
-    {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stream);                           \
-    }                                                                                                                         \
-    type read_##typename(typedArgs)                                                                                           \
-    {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, _cori_default_inputError_handler, stdin);                            \
-    }                                                                                                                         \
-    type read_##typename##_handleErrors(typedArgs, InputErrorHandler inputErrorHandler)                                       \
-    {                                                                                                                         \
-        return read_##typename##_handleErrors_from(args, inputErrorHandler, stdin);                                           \
-    }                                                                                                                         \
-    InputError tryRead_##typename(type * outResult, typedArgs)                                                                \
-    {                                                                                                                         \
-        return tryRead_##typename##_from(outResult, args, stdin);                                                             \
-    }                                                                                                                         \
-    InputError _cori_tryRead_##typename##_impl(char **pBuffer, size_t *pBufferSize, type *outResult, typedArgs, FILE *stream) \
-    {                                                                                                                         \
-        InputError error = readRawFunc(pBuffer, pBufferSize, stream, args);                                                   \
-        if (error) {                                                                                                          \
-            return error;                                                                                                     \
-        }                                                                                                                     \
-        type result;                                                                                                          \
-        error = _cori_convert_##typename(*pBuffer, &result, args);                                                            \
-        if (error) {                                                                                                          \
-            return error;                                                                                                     \
-        }                                                                                                                     \
-        *outResult = result;                                                                                                  \
-        return IE_OK;                                                                                                         \
-    }
-
-_cori_FOR_EACH_CONVERSION(_cori_DEFINE_READ_FUNCS, _cori_DEFINE_READ_FUNCS_WITH_ARGS)
-
-char *read_linel_handleErrors_from(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler, FILE *stream);
-InputError tryRead_linel_from(char *buf, size_t bufsize, FILE *stream);
-char *read_linel_from(char *buf, size_t bufsize, FILE *stream);
-char *read_linel(char *buf, size_t bufsize);
-char *read_linel_handleErrors(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler);
-InputError tryRead_linel(char *buf, size_t bufsize);
-InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, FILE *stream);
-
-char *read_linel_handleErrors_from(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler, FILE *stream)
+char *read_linel_or_from(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler, FILE *stream)
 {
     InputError error;
     while ((error = _cori_tryRead_linel_impl(buf, bufsize, stream))) {
@@ -307,33 +261,26 @@ InputError tryRead_linel_from(char *buf, size_t bufsize, FILE *stream)
 }
 char *read_linel_from(char *buf, size_t bufsize, FILE *stream)
 {
-    return read_linel_handleErrors_from(buf, bufsize, _cori_default_inputError_handler, stream);
+    return read_linel_or_from(buf, bufsize, cori_handle_error_noop, stream);
 }
 char *read_linel(char *buf, size_t bufsize)
 {
-    return read_linel_handleErrors_from(buf, bufsize, _cori_default_inputError_handler, stdin);
+    return read_linel_or_from(buf, bufsize, cori_handle_error_noop, stdin);
 }
-char *read_linel_handleErrors(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler)
+char *read_linel_or(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler)
 {
-    return read_linel_handleErrors_from(buf, bufsize, inputErrorHandler, stdin);
+    return read_linel_or_from(buf, bufsize, inputErrorHandler, stdin);
 }
 InputError tryRead_linel(char *buf, size_t bufsize)
 {
     return tryRead_linel_from(buf, bufsize, stdin);
-}
-InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, FILE *stream)
-{
-    if (fgets(buf, bufsize, stream) == NULL) {
-        return IE_EOF;
-    }
-    return IE_OK;
 }
 
 // INTERNAL
 
 // Converters
 
-InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesChars, char const *noChars)
+CORI_DEFINITION InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesChars, char const *noChars)
 {
     InputError error = _cori_getCharacterConversionError(str);
     if (error) {
@@ -349,7 +296,7 @@ InputError _cori_convert_bool(char const *str, bool *outResult, char const *yesC
     return error;
 }
 
-InputError _cori_convert_character(char const *str, char *outResult)
+CORI_DEFINITION InputError _cori_convert_character(char const *str, char *outResult)
 {
     InputError error = _cori_getCharacterConversionError(str);
     if (!error) {
@@ -358,7 +305,7 @@ InputError _cori_convert_character(char const *str, char *outResult)
     return error;
 }
 
-InputError _cori_convert_until(char const *str, char **outResult, char delimiter)
+CORI_DEFINITION InputError _cori_convert_until(char const *str, char **outResult, char delimiter)
 {
     (void)delimiter;
     // Duplicate the string as the orginal one will be freed.
@@ -370,99 +317,16 @@ InputError _cori_convert_until(char const *str, char **outResult, char delimiter
     return IE_OK;
 }
 
-InputError _cori_convert_line(char const *str, char **outResult)
+CORI_DEFINITION InputError _cori_convert_line(char const *str, char **outResult)
 {
     *outResult = strdup(str);
     _cori_remove_lastChar(*outResult);
     return IE_OK;
 }
 
-// Custom numeric converters
-
-InputError _cori_convert_int(char const *str, int *outResult)
-{
-    return _cori_convert_int_base(str, outResult, 0);
-}
-
-InputError _cori_convert_int_base(char const *str, int *outResult, int base)
-{
-    long result;
-    InputError error = _cori_convert_long_base(str, &result, base);
-    if (error) {
-        return error;
-    }
-    if (result < INT_MIN || result > INT_MAX) {
-        return IE_NUMBER_OUT_OF_BOUNDS;
-    }
-    *outResult = (int)result;
-    return IE_OK;
-}
-
-InputError _cori_convert_short(char const *str, short *outResult)
-{
-    return _cori_convert_short_base(str, outResult, 0);
-}
-
-InputError _cori_convert_short_base(char const *str, short *outResult, int base)
-{
-    long result;
-    InputError error = _cori_convert_long_base(str, &result, base);
-    if (error) {
-        return error;
-    }
-    if (result < SHRT_MIN || result > SHRT_MAX) {
-        return IE_NUMBER_OUT_OF_BOUNDS;
-    }
-    *outResult = (short)result;
-    return IE_OK;
-}
-
-InputError _cori_convert_uint(char const *str, unsigned int *outResult)
-{
-    return _cori_convert_uint_base(str, outResult, 0);
-}
-
-InputError _cori_convert_uint_base(char const *str, unsigned int *outResult, int base)
-{
-    unsigned long result;
-    InputError error = _cori_convert_ulong_base(str, &result, base);
-    if (error) {
-        return error;
-    }
-    if (result > UINT_MAX) {
-        return IE_NUMBER_OUT_OF_BOUNDS;
-    }
-    *outResult = (unsigned int)result;
-    return IE_OK;
-}
-
-InputError _cori_convert_ushort(char const *str, unsigned short *outResult)
-{
-    return _cori_convert_ushort_base(str, outResult, 0);
-}
-
-InputError _cori_convert_ushort_base(char const *str, unsigned short *outResult, int base)
-{
-    unsigned long result;
-    InputError error = _cori_convert_ulong_base(str, &result, base);
-    if (error) {
-        return error;
-    }
-    if (result > USHRT_MAX) {
-        return IE_NUMBER_OUT_OF_BOUNDS;
-    }
-    *outResult = (unsigned short)result;
-    return IE_OK;
-}
-
 // Standard library numeric conversion wrappers
 
-InputError _cori_convert_intmax(char const *str, intmax_t *outResult)
-{
-    return _cori_convert_intmax_base(str, outResult, 0);
-}
-
-InputError _cori_convert_intmax_base(char const *str, intmax_t *outResult, int base)
+CORI_DEFINITION InputError _cori_convert_intmax_base(char const *str, intmax_t *outResult, int base)
 {
     errno = 0;
     char *end = NULL;
@@ -474,12 +338,12 @@ InputError _cori_convert_intmax_base(char const *str, intmax_t *outResult, int b
     return error;
 }
 
-InputError _cori_convert_longlong(char const *str, long long *outResult)
+CORI_DEFINITION InputError _cori_convert_intmax(char const *str, intmax_t *outResult)
 {
-    return _cori_convert_longlong_base(str, outResult, 0);
+    return _cori_convert_intmax_base(str, outResult, 0);
 }
 
-InputError _cori_convert_longlong_base(char const *str, long long *outResult, int base)
+CORI_DEFINITION InputError _cori_convert_longlong_base(char const *str, long long *outResult, int base)
 {
     errno = 0;
     char *end = NULL;
@@ -491,12 +355,12 @@ InputError _cori_convert_longlong_base(char const *str, long long *outResult, in
     return error;
 }
 
-InputError _cori_convert_long(char const *str, long *outResult)
+CORI_DEFINITION InputError _cori_convert_longlong(char const *str, long long *outResult)
 {
-    return _cori_convert_long_base(str, outResult, 0);
+    return _cori_convert_longlong_base(str, outResult, 0);
 }
 
-InputError _cori_convert_long_base(char const *str, long *outResult, int base)
+CORI_DEFINITION InputError _cori_convert_long_base(char const *str, long *outResult, int base)
 {
     errno = 0;
     char *end = NULL;
@@ -508,12 +372,12 @@ InputError _cori_convert_long_base(char const *str, long *outResult, int base)
     return error;
 }
 
-InputError _cori_convert_uintmax(char const *str, uintmax_t *outResult)
+CORI_DEFINITION InputError _cori_convert_long(char const *str, long *outResult)
 {
-    return _cori_convert_uintmax_base(str, outResult, 0);
+    return _cori_convert_long_base(str, outResult, 0);
 }
 
-InputError _cori_convert_uintmax_base(char const *str, uintmax_t *outResult, int base)
+CORI_DEFINITION InputError _cori_convert_uintmax_base(char const *str, uintmax_t *outResult, int base)
 {
     InputError error = _cori_deny_negative(str);
     if (error) {
@@ -529,12 +393,12 @@ InputError _cori_convert_uintmax_base(char const *str, uintmax_t *outResult, int
     return error;
 }
 
-InputError _cori_convert_ulonglong(char const *str, unsigned long long *outResult)
+CORI_DEFINITION InputError _cori_convert_uintmax(char const *str, uintmax_t *outResult)
 {
-    return _cori_convert_ulonglong_base(str, outResult, 0);
+    return _cori_convert_uintmax_base(str, outResult, 0);
 }
 
-InputError _cori_convert_ulonglong_base(char const *str, unsigned long long *outResult, int base)
+CORI_DEFINITION InputError _cori_convert_ulonglong_base(char const *str, unsigned long long *outResult, int base)
 {
     InputError error = _cori_deny_negative(str);
     if (error) {
@@ -550,12 +414,12 @@ InputError _cori_convert_ulonglong_base(char const *str, unsigned long long *out
     return error;
 }
 
-InputError _cori_convert_ulong(char const *str, unsigned long *outResult)
+CORI_DEFINITION InputError _cori_convert_ulonglong(char const *str, unsigned long long *outResult)
 {
-    return _cori_convert_ulong_base(str, outResult, 0);
+    return _cori_convert_ulonglong_base(str, outResult, 0);
 }
 
-InputError _cori_convert_ulong_base(char const *str, unsigned long *outResult, int base)
+CORI_DEFINITION InputError _cori_convert_ulong_base(char const *str, unsigned long *outResult, int base)
 {
     InputError error = _cori_deny_negative(str);
     if (error) {
@@ -571,7 +435,12 @@ InputError _cori_convert_ulong_base(char const *str, unsigned long *outResult, i
     return error;
 }
 
-InputError _cori_convert_longdouble(char const *str, long double *outResult)
+CORI_DEFINITION InputError _cori_convert_ulong(char const *str, unsigned long *outResult)
+{
+    return _cori_convert_ulong_base(str, outResult, 0);
+}
+
+CORI_DEFINITION InputError _cori_convert_longdouble(char const *str, long double *outResult)
 {
     errno = 0;
     char *end = NULL;
@@ -583,7 +452,7 @@ InputError _cori_convert_longdouble(char const *str, long double *outResult)
     return error;
 }
 
-InputError _cori_convert_double(char const *str, double *outResult)
+CORI_DEFINITION InputError _cori_convert_double(char const *str, double *outResult)
 {
     errno = 0;
     char *end = NULL;
@@ -595,7 +464,7 @@ InputError _cori_convert_double(char const *str, double *outResult)
     return error;
 }
 
-InputError _cori_convert_float(char const *str, float *outResult)
+CORI_DEFINITION InputError _cori_convert_float(char const *str, float *outResult)
 {
     errno = 0;
     char *end = NULL;
@@ -607,81 +476,214 @@ InputError _cori_convert_float(char const *str, float *outResult)
     return error;
 }
 
-// Utility functions
+// Custom numeric converters
 
-void _cori_default_inputError_handler(InputError error)
+CORI_DEFINITION InputError _cori_convert_int_base(char const *str, int *outResult, int base)
+{
+    long result;
+    InputError error = _cori_convert_long_base(str, &result, base);
+    if (error) {
+        return error;
+    }
+    if (result < INT_MIN || result > INT_MAX) {
+        return IE_NUMBER_OUT_OF_BOUNDS;
+    }
+    *outResult = (int)result;
+    return IE_OK;
+}
+
+CORI_DEFINITION InputError _cori_convert_int(char const *str, int *outResult)
+{
+    return _cori_convert_int_base(str, outResult, 0);
+}
+
+CORI_DEFINITION InputError _cori_convert_short_base(char const *str, short *outResult, int base)
+{
+    long result;
+    InputError error = _cori_convert_long_base(str, &result, base);
+    if (error) {
+        return error;
+    }
+    if (result < SHRT_MIN || result > SHRT_MAX) {
+        return IE_NUMBER_OUT_OF_BOUNDS;
+    }
+    *outResult = (short)result;
+    return IE_OK;
+}
+
+CORI_DEFINITION InputError _cori_convert_short(char const *str, short *outResult)
+{
+    return _cori_convert_short_base(str, outResult, 0);
+}
+
+CORI_DEFINITION InputError _cori_convert_uint_base(char const *str, unsigned int *outResult, int base)
+{
+    unsigned long result;
+    InputError error = _cori_convert_ulong_base(str, &result, base);
+    if (error) {
+        return error;
+    }
+    if (result > UINT_MAX) {
+        return IE_NUMBER_OUT_OF_BOUNDS;
+    }
+    *outResult = (unsigned int)result;
+    return IE_OK;
+}
+
+CORI_DEFINITION InputError _cori_convert_uint(char const *str, unsigned int *outResult)
+{
+    return _cori_convert_uint_base(str, outResult, 0);
+}
+
+CORI_DEFINITION InputError _cori_convert_ushort_base(char const *str, unsigned short *outResult, int base)
+{
+    unsigned long result;
+    InputError error = _cori_convert_ulong_base(str, &result, base);
+    if (error) {
+        return error;
+    }
+    if (result > USHRT_MAX) {
+        return IE_NUMBER_OUT_OF_BOUNDS;
+    }
+    *outResult = (unsigned short)result;
+    return IE_OK;
+}
+
+CORI_DEFINITION InputError _cori_convert_ushort(char const *str, unsigned short *outResult)
+{
+    return _cori_convert_ushort_base(str, outResult, 0);
+}
+
+// Error handlers
+
+void cori_handle_error_noop(InputError error)
 {
     (void)error;
 }
 
-InputError _cori_get_numberConversionError(char const *str, char const *end)
+void cori_handle_error_stderr_msg(InputError error)
 {
-    if (errno == ERANGE) {
-        return IE_NUMBER_OUT_OF_BOUNDS;
-    } else if (errno == EINVAL) {
-        return IE_UNSUPPORTED_BASE;
-    } else if (*end != '\0' && *end != '\n') {
-        return IE_NOT_A_NUMBER;
-    } else if (str == end) {
-        return IE_EMPTY;
+    fprintf(stderr, "input error: ");
+    switch (error) {
+    case IE_EMPTY: fputs("empty input", stderr); break;
+    case IE_EOF: fputs("EOF reached", stderr); break;
+    case IE_INVALID_BOOL_CHAR: fputs("invalid boolean char", stderr); break;
+    case IE_MULTIPLE_CHARS: fputs("multiple chars", stderr); break;
+    case IE_NOT_A_NUMBER: fputs("not a number", stderr); break;
+    case IE_NUMBER_OUT_OF_BOUNDS: fputs("number out of bounds", stderr); break;
+    case IE_OUT_OF_MEMORY: fputs("out of memory", stderr); break;
+    case IE_UNSUPPORTED_BASE: fputs("unsupported numeric base", stderr); break;
+    default: fprintf(stderr, "%d", error); break;
     }
-    return IE_OK;
+    putc('\n', stderr);
 }
 
-InputError _cori_getCharacterConversionError(char const *buffer)
-{
-    // Accout for terminating newline
-    if (_cori_is_stringLength_exactly(buffer, 1)) {
-        return IE_EMPTY;
-    } else if (!_cori_is_stringLength_exactly(buffer, 2)) {
-        return IE_MULTIPLE_CHARS;
+// Conversions definitions
+
+#define _cori_DEFINE_READ_FUNCS(readRawFunc, typename, type)                                                                       \
+    CORI_DEFINITION InputError _cori_tryRead_##typename##_impl(char **pBuffer, size_t *pBufferSize, type *outResult, FILE *stream) \
+    {                                                                                                                              \
+        InputError error = readRawFunc(pBuffer, pBufferSize, stream);                                                              \
+        if (error) {                                                                                                               \
+            return error;                                                                                                          \
+        }                                                                                                                          \
+        type result;                                                                                                               \
+        error = _cori_convert_##typename(*pBuffer, &result);                                                                       \
+        if (error) {                                                                                                               \
+            return error;                                                                                                          \
+        }                                                                                                                          \
+        *outResult = result;                                                                                                       \
+        return IE_OK;                                                                                                              \
+    }                                                                                                                              \
+    type read_##typename##_or_from(InputErrorHandler inputErrorHandler, FILE *stream)                                    \
+    {                                                                                                                              \
+        char *buffer = NULL;                                                                                                       \
+        size_t bufferSize = 0;                                                                                                     \
+        type result;                                                                                                               \
+        InputError error;                                                                                                          \
+        while ((error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, &result, stream))) {                                 \
+            inputErrorHandler(error);                                                                                              \
+        }                                                                                                                          \
+        free(buffer);                                                                                                              \
+        return result;                                                                                                             \
+    }                                                                                                                              \
+    InputError tryRead_##typename##_from(type *outResult, FILE *stream)                                                            \
+    {                                                                                                                              \
+        char *buffer = NULL;                                                                                                       \
+        size_t bufferSize = 0;                                                                                                     \
+        InputError error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, outResult, stream);                               \
+        free(buffer);                                                                                                              \
+        return error;                                                                                                              \
+    }                                                                                                                              \
+    type read_##typename##_from(FILE *stream)                                                                                      \
+    {                                                                                                                              \
+        return read_##typename##_or_from(cori_handle_error_noop, stream);                                               \
+    }                                                                                                                              \
+    type read_##typename(void)                                                                                                     \
+    {                                                                                                                              \
+        return read_##typename##_or_from(cori_handle_error_noop, stdin);                                                \
+    }                                                                                                                              \
+    type read_##typename##_or(InputErrorHandler inputErrorHandler)                                                       \
+    {                                                                                                                              \
+        return read_##typename##_or_from(inputErrorHandler, stdin);                                                      \
+    }                                                                                                                              \
+    InputError tryRead_##typename(type * outResult)                                                                                \
+    {                                                                                                                              \
+        return tryRead_##typename##_from(outResult, stdin);                                                                        \
     }
-    return IE_OK;
-}
 
-#if defined CORI_GETDELIM
-InputError _cori_read_rawLine(char **pBuffer, size_t *pBufferSize, FILE *stream, ...)
-{
-    return _cori_read_rawDelim(pBuffer, pBufferSize, stream, '\n');
-}
-
-InputError _cori_read_rawDelim(char **pBuffer, size_t *pBufferSize, FILE *stream, int delimiter, ...)
-{
-    errno = 0;
-    if (getdelim(pBuffer, pBufferSize, delimiter, stream) == -1) {
-        if (errno == ENOMEM) {
-            return IE_OUT_OF_MEMORY;
-        }
-        // Ctrl+D hit: push newline to avoid infinite loop.
-        ungetc('\n', stream);
-        // Read it back and trigger input prompt
-        getc(stream);
-        return IE_EOF;
+#define _cori_DEFINE_READ_FUNCS_WITH_ARGS(readRawFunc, typename, type, typedArgs, args)                                                       \
+    CORI_DEFINITION InputError _cori_tryRead_##typename##_impl(char **pBuffer, size_t *pBufferSize, type *outResult, typedArgs, FILE *stream) \
+    {                                                                                                                                         \
+        InputError error = readRawFunc(pBuffer, pBufferSize, stream, args);                                                                   \
+        if (error) {                                                                                                                          \
+            return error;                                                                                                                     \
+        }                                                                                                                                     \
+        type result;                                                                                                                          \
+        error = _cori_convert_##typename(*pBuffer, &result, args);                                                                            \
+        if (error) {                                                                                                                          \
+            return error;                                                                                                                     \
+        }                                                                                                                                     \
+        *outResult = result;                                                                                                                  \
+        return IE_OK;                                                                                                                         \
+    }                                                                                                                                         \
+    type read_##typename##_or_from(typedArgs, InputErrorHandler inputErrorHandler, FILE *stream)                                    \
+    {                                                                                                                                         \
+        char *buffer = NULL;                                                                                                                  \
+        size_t bufferSize = 0;                                                                                                                \
+        type result;                                                                                                                          \
+        InputError error;                                                                                                                     \
+        while ((error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, &result, args, stream))) {                                      \
+            inputErrorHandler(error);                                                                                                         \
+        }                                                                                                                                     \
+        free(buffer);                                                                                                                         \
+        return result;                                                                                                                        \
+    }                                                                                                                                         \
+    InputError tryRead_##typename##_from(type *outResult, typedArgs, FILE *stream)                                                            \
+    {                                                                                                                                         \
+        char *buffer = NULL;                                                                                                                  \
+        size_t bufferSize = 0;                                                                                                                \
+        InputError error = _cori_tryRead_##typename##_impl(&buffer, &bufferSize, outResult, args, stream);                                    \
+        free(buffer);                                                                                                                         \
+        return error;                                                                                                                         \
+    }                                                                                                                                         \
+    type read_##typename##_from(typedArgs, FILE *stream)                                                                                      \
+    {                                                                                                                                         \
+        return read_##typename##_or_from(args, cori_handle_error_noop, stream);                                                    \
+    }                                                                                                                                         \
+    type read_##typename(typedArgs)                                                                                                           \
+    {                                                                                                                                         \
+        return read_##typename##_or_from(args, cori_handle_error_noop, stdin);                                                     \
+    }                                                                                                                                         \
+    type read_##typename##_or(typedArgs, InputErrorHandler inputErrorHandler)                                                       \
+    {                                                                                                                                         \
+        return read_##typename##_or_from(args, inputErrorHandler, stdin);                                                           \
+    }                                                                                                                                         \
+    InputError tryRead_##typename(type * outResult, typedArgs)                                                                                \
+    {                                                                                                                                         \
+        return tryRead_##typename##_from(outResult, args, stdin);                                                                             \
     }
-    return IE_OK;
-}
-#endif
 
-void _cori_remove_lastChar(char *str)
-{
-    assert(str != NULL);
-    str[strlen(str) - 1] = '\0';
-}
-
-bool _cori_is_stringLength_exactly(char const *str, size_t length)
-{
-    size_t measuredLength = 0;
-    char const *pCurrent = str;
-    while (measuredLength < length && *pCurrent != '\0') {
-        ++measuredLength;
-        ++pCurrent;
-    }
-    return length == measuredLength && *pCurrent == '\0';
-}
-
-InputError _cori_deny_negative(char const *str)
-{
-    return str[0] == '-' ? IE_NUMBER_OUT_OF_BOUNDS : IE_OK;
-}
+_cori_FOREACH_CONVERSION(_cori_DEFINE_READ_FUNCS, _cori_DEFINE_READ_FUNCS_WITH_ARGS)
 
 #endif // CORI_IMPLEMENTATION

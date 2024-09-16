@@ -6,26 +6,8 @@
 
 // #define CORI_DEFINITION static inline
 
-#include "stb_cori.h"
 #define CORI_IMPLEMENTATION
 #include "stb_cori.h"
-
-void handle_exampleInputError(InputError error)
-{
-    char *s;
-    switch (error) {
-    case IE_EMPTY: s = "Empty input"; break;
-    case IE_EOF: s = "EOF reached"; break;
-    case IE_INVALID_BOOL_CHAR: s = "Invalid boolean char"; break;
-    case IE_MULTIPLE_CHARS: s = "Multiple chars"; break;
-    case IE_NOT_A_NUMBER: s = "Not a number"; break;
-    case IE_NUMBER_OUT_OF_BOUNDS: s = "Number out of bounds"; break;
-    case IE_OUT_OF_MEMORY: s = "Out of memory"; break;
-    case IE_UNSUPPORTED_BASE: s = "Unsupported numeric base"; break;
-    default: assert(!"Invalid InputError enum value");
-    }
-    puts(s);
-}
 
 int main()
 {
@@ -45,10 +27,10 @@ int main()
         result = read_int();
         printf("Recieved %d\n", result);
     }
-    puts("Example: read_short_handleErrors");
+    puts("Example: read_short_or");
     {
         printf("Type an integer (max %d): ", SHRT_MAX);
-        short result = read_short_handleErrors(handle_exampleInputError);
+        short result = read_short_or(cori_handle_error_stderr_msg);
         printf("Recieved %d\n", result);
     }
     puts("Example: tryRead_int");
@@ -71,7 +53,7 @@ int main()
     puts("Example: read_bool");
     {
         char const yesChars[] = "yY", noChars[] = "nN";
-        printf("Do you like this library? ");
+        printf("Do you like this library? (y/n) ");
         bool result = read_bool(yesChars, noChars);
         puts(result ? "Thank you" : "*Ernie prepares to commit a hate crime*");
     }
