@@ -154,12 +154,12 @@ _cori_FOREACH_CONVERSION(_cori_DECLARE_READ_FUNCS, _cori_DECLARE_READ_FUNCS_WITH
     // Necessary as strtoul functions don't handle negative input
     CORI_DEFINITION InputError _cori_deny_negative(char const *);
 
-CORI_DEFINITION char *read_linel_from(char *, size_t, FILE *);
-CORI_DEFINITION char *read_linel_or_from(char *, size_t, InputErrorHandler, FILE *);
-CORI_DEFINITION char *read_linel_or(char *, size_t, InputErrorHandler);
-CORI_DEFINITION char *read_linel(char *, size_t);
-CORI_DEFINITION InputError tryRead_linel_from(char *, size_t, FILE *);
-CORI_DEFINITION InputError tryRead_linel(char *, size_t);
+CORI_DEFINITION char *read_linel_from(size_t bufsize, char buf[const static bufsize], FILE *);
+CORI_DEFINITION char *read_linel_or_from(size_t bufsize, char buf[const static bufsize], InputErrorHandler, FILE *);
+CORI_DEFINITION char *read_linel_or(size_t bufsize, char buf[const static bufsize], InputErrorHandler);
+CORI_DEFINITION char *read_linel(size_t bufsize, char buf[const static bufsize]);
+CORI_DEFINITION InputError tryRead_linel_from(size_t bufsize, char buf[const static bufsize], FILE *);
+CORI_DEFINITION InputError tryRead_linel(size_t bufsize, char buf[const static bufsize]);
 
 #endif // STB_CORI_H_
 
@@ -239,7 +239,7 @@ CORI_DEFINITION InputError _cori_deny_negative(char const *str)
 
 // Read functions definitions
 
-CORI_DEFINITION InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, FILE *stream)
+CORI_DEFINITION InputError _cori_tryRead_linel_impl(size_t bufsize, char buf[const static bufsize], FILE *stream)
 {
     if (fgets(buf, bufsize, stream) == NULL) {
         return IE_EOF;
@@ -247,33 +247,33 @@ CORI_DEFINITION InputError _cori_tryRead_linel_impl(char *buf, size_t bufsize, F
     return IE_OK;
 }
 
-char *read_linel_or_from(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler, FILE *stream)
+char *read_linel_or_from(size_t bufsize, char buf[const static bufsize], InputErrorHandler inputErrorHandler, FILE *stream)
 {
     InputError error;
-    while ((error = _cori_tryRead_linel_impl(buf, bufsize, stream))) {
+    while ((error = _cori_tryRead_linel_impl(bufsize, buf, stream))) {
         inputErrorHandler(error);
     }
     return buf;
 }
-InputError tryRead_linel_from(char *buf, size_t bufsize, FILE *stream)
+InputError tryRead_linel_from(size_t bufsize, char buf[const static bufsize], FILE *stream)
 {
-    return _cori_tryRead_linel_impl(buf, bufsize, stream);
+    return _cori_tryRead_linel_impl(bufsize, buf, stream);
 }
-char *read_linel_from(char *buf, size_t bufsize, FILE *stream)
+char *read_linel_from(size_t bufsize, char buf[const static bufsize], FILE *stream)
 {
-    return read_linel_or_from(buf, bufsize, cori_handle_error_noop, stream);
+    return read_linel_or_from(bufsize, buf, cori_handle_error_noop, stream);
 }
-char *read_linel(char *buf, size_t bufsize)
+char *read_linel(size_t bufsize, char buf[const static bufsize])
 {
-    return read_linel_or_from(buf, bufsize, cori_handle_error_noop, stdin);
+    return read_linel_or_from(bufsize, buf, cori_handle_error_noop, stdin);
 }
-char *read_linel_or(char *buf, size_t bufsize, InputErrorHandler inputErrorHandler)
+char *read_linel_or(size_t bufsize, char buf[const static bufsize], InputErrorHandler inputErrorHandler)
 {
-    return read_linel_or_from(buf, bufsize, inputErrorHandler, stdin);
+    return read_linel_or_from(bufsize, buf, inputErrorHandler, stdin);
 }
-InputError tryRead_linel(char *buf, size_t bufsize)
+InputError tryRead_linel(size_t bufsize, char buf[const static bufsize])
 {
-    return tryRead_linel_from(buf, bufsize, stdin);
+    return tryRead_linel_from(bufsize, buf, stdin);
 }
 
 // INTERNAL

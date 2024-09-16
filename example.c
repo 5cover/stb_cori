@@ -17,7 +17,7 @@ int main()
     {
         char answer[26];
         printf("Type the alphabet: ");
-        read_linel(answer, 26);
+        read_linel(26, answer);
         printf("Recieved %s\n", answer);
     }
     puts("Example: read_int");
