@@ -119,7 +119,7 @@ printf("How old are you ? ");
 int result = read_int_or(&inputErrorHandler);
 ```
 
-Sample input eror handler:
+Sample input error handler:
 
 ```c
 void inputErrorHandler(InputError error)
@@ -159,9 +159,9 @@ These functions return an error code instead of the converted result, meaning th
 
 They follow the usual "try-function" pattern (link?) with an out argument.
 
-They are especially useful in loops. Indeed, an ``InputError`` value can be treated as a boolean indicating whether or not an error occured, as:
+They are especially useful in loops. Indeed, an ``InputError`` value can be treated as a boolean indicating whether or not an error occurred, as:
 
-- ``IE_OK``, the value that indicates that no error occured, has the numeric value ``0``, which means it evaluates to ``false``
+- ``IE_OK``, the value that indicates that no error occurred, has the numeric value ``0``, which means it evaluates to ``false``
 - Any other value has a non-zero numeric value, meaning it evaluates to ``true``
 
 Sample code:

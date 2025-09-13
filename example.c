@@ -18,20 +18,20 @@ int main()
         char answer[26];
         printf("Type the alphabet: ");
         read_linel(26, answer);
-        printf("Recieved %s\n", answer);
+        printf("Received %s\n", answer);
     }
     puts("Example: read_int");
     {
         int result;
         printf("Type an integer: ");
         result = read_int();
-        printf("Recieved %d\n", result);
+        printf("Received %d\n", result);
     }
     puts("Example: read_short_or");
     {
         printf("Type an integer (max %d): ", SHRT_MAX);
         short result = read_short_or(cori_handle_error_stderr_msg);
-        printf("Recieved %d\n", result);
+        printf("Received %d\n", result);
     }
     puts("Example: tryRead_int");
     {
@@ -40,7 +40,7 @@ int main()
             printf("Type an integer smaller than 10: ");
             error = tryRead_int(&result);
         } while (error || result >= 10);
-        printf("Recieved %d\n", result);
+        printf("Received %d\n", result);
     }
     puts("Example: read_line_from");
     {
